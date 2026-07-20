@@ -1,1 +1,33 @@
 
+name: Update GTA 6 News
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-news:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch GTA 6 News
+        run: |
+          curl -L "https://newsapi.org/v2/everything?q=%22GTA%206%22&language=en&sortBy=publishedAt&pageSize=20&apiKey=${{ secrets.NEWS_API_KEY }}" -o news.json
+
+      - name: Commit news.json
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          git add news.json
+
+          git diff --cached --quiet || git commit -m "Update GTA 6 news"
+
+          git push
